@@ -1,0 +1,58 @@
+<!DOCTYPE>
+<html ng-app="myApp">
+    <head>
+        
+        
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" 
+        integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" 
+        integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+                
+        <title>haproxyUI</title>
+    </head>
+    <body>
+        
+        <div class="container" ng-controller="AppCtrl">
+            
+            <h3 style="color: red">{{errr}}</h3>
+	    <h1>HAProxy Configuration</h1>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Frontend</th>
+                        <th>Backend</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="ip in ipObjArr">
+                        <td>{{ip.frontend}}</td>
+                        <td>{{ip.backend}}</td>
+                        <td>{{ip.status}}</td>
+                    </tr>
+                </tbody>
+            </table>
+           
+            <p>
+                <h4>Your haproxy.cfg file:</h4>
+            </p>
+	        
+            <p>
+<a onclick="$('#text').slideToggle('slow');" href="javascript://">Show/Hide</a>                
+<div id="text" style="display:none; white-space: pre-wrap; word-wrap: break-word; -moz-control-character-visibility: visible;">{{file}}</div>
+                
+            </p>
+            <button type="button" onclick="window.location.href = '/download';">Download</button>
+        </div>
+        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+        <script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0-rc.0/angular.min.js'></script>
+        <script src='controllers/controller.js'></script>
+        
+        
+    </body>
+</html>
