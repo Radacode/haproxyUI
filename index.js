@@ -177,12 +177,22 @@ app.post('/certificate', function(req, res){
   var name = req.body.name;
 
   var path = '/etc/pki/tls/private/' + name + '.pem';
+  var restartCmd = 'service haproxy restart';
+  
+  var exec = require('child_process').exec;
   
   fs.writeFile(path, certificate, function (err) {
             if (err) {
                 return console.log(err);
             }
-            console.log('wroten');
+            console.log('Wroten in ' + path);
+            
+            exec(restartCmd, function (error, stdout, stderr) {
+                if (error !== null) {
+                    console.log('exec error: ' + error);
+                }
+                console.log('Restarting haproxy');
+            });
   });
   
   
@@ -190,7 +200,7 @@ app.post('/certificate', function(req, res){
 });
 
 
-var server = app.listen(3030, function () {
+var server = app.listen(8083, function () {
     var host = server.address().address;
     var port = server.address().port;
 
