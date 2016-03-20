@@ -1,0 +1,30 @@
+.wrapper{
+    text-align: center;
+}
+
+.container{
+    text-align: left;
+    padding: 10px;
+    display: inline-block;
+    width: 450px;
+}
+
+.uk-panel{
+    margin: 5px;
+}
+
+.color{
+    color: black;
+}
+
+textarea {
+    resize: none;
+}
+
+#text{
+    display:none; 
+    white-space: pre-wrap; 
+    word-wrap: break-word; 
+    -moz-control-character-visibility: visible;
+    width: 450px;
+}
