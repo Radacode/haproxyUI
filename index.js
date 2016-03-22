@@ -168,7 +168,6 @@ app.get('/download', function(req, res){
 app.get('/view', function(req, res){
   var file = fs.readFileSync('/etc/haproxy/haproxy.cfg', 'utf8');
   res.end(file);
-
 });
 
 app.post('/certificate', function(req, res){
@@ -181,26 +180,23 @@ app.post('/certificate', function(req, res){
   
   var exec = require('child_process').exec;
   
-//   fs.writeFile(path, certificate, function (err) {
-//             if (err) {
-//                 return console.log(err);
-//             }
-//             console.log('Wroten in ' + path);
+  fs.writeFile(path, certificate, function (err) {
+            if (err) {
+                return console.log(err);
+            }
+            console.log('Wroten in ' + path);
             
-//             exec(restartCmd, function (error, stdout, stderr) {
-//                 if (error !== null) {
-//                     console.log('exec error: ' + error);
-//                 }
-//                 console.log('Restarting haproxy');
-//             });
-//   });
-  
-  
-
+            exec(restartCmd, function (error, stdout, stderr) {
+                if (error !== null) {
+                    console.log('exec error: ' + error);
+                }
+                console.log('Restarting haproxy');
+            });
+  });
 });
 
 
-var server = app.listen(8084, function () {
+var server = app.listen(8082, function () {
     var host = server.address().address;
     var port = server.address().port;
 
