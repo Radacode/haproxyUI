@@ -171,32 +171,51 @@ app.get('/view', function(req, res){
 });
 
 app.post('/certificate', function(req, res){
-  
+    
+  var haproxy_origin = fs.readFileSync('/etc/haproxy/haproxy.cfg', 'utf8');
+  var haproxy_splited_rows = haproxy_origin.split('\n');
+           
   var certificate = req.body.pem;
   var name = req.body.name;
+  var front = req.body.frontend;
+  console.log("Add crt to front:   " + front);
 
   var path = '/etc/pki/tls/private/' + name + '.pem';
   var restartCmd = 'service haproxy restart';
   
   var exec = require('child_process').exec;
   
+  for(var i = 0; i<haproxy_splited_rows.length; ++i){
+      if (haproxy_splited_rows[i].indexOf('bind') >=0 && haproxy_splited_rows[i].indexOf(front + ':') >=0){
+          haproxy_splited_rows[i] += ' ssl crt /etc/pki/tls/private/' + name +'.pem';
+      }
+  }
+  
+  var new_haproxy = haproxy_splited_rows.join('\n');
+  
   fs.writeFile(path, certificate, function (err) {
             if (err) {
                 return console.log(err);
             }
-            console.log('Wroten in ' + path);
+            console.log('Certificate wroten in ' + path);
             
-            exec(restartCmd, function (error, stdout, stderr) {
-                if (error !== null) {
-                    console.log('exec error: ' + error);
+                fs.writeFile('/etc/haproxy/haproxy.cfg', new_haproxy, function (err) {
+                if (err) {
+                    return console.log(err);
                 }
-                console.log('Restarting haproxy');
-            });
-  });
+                console.log('haproxy.cfg updated');
+            
+                    exec(restartCmd, function (error, stdout, stderr) {
+                        if (error !== null) {
+                            console.log('exec error: ' + error);
+                        }
+                        console.log('Restarting haproxy');
+                    });
+            });  
+ });
 });
 
-
-var server = app.listen(8082, function () {
+var server = app.listen(8081, function () {
     var host = server.address().address;
     var port = server.address().port;
 

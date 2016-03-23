@@ -44,7 +44,9 @@ myApp.controller('AppCtrl', ['$scope', '$http', function($scope, $http) {
 	      
 	if(response == 'haproxy.cfg not found'){$scope.errr = response;}
 		
-	else {$scope.ipObjArr = response;}
+	else { 
+        $scope.ipObjArr = response; 
+    }
       
     });
 

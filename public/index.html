@@ -16,7 +16,7 @@
         <div class="container" ng-controller="AppCtrl" >
             
 	    <h1 align="center">HAProxy Configuration</h1>
-          
+
           <div class="container uk-panel uk-panel-box uk-form">
           <h3 style="color: red">{{errr}}</h3>
             
@@ -47,8 +47,14 @@
             
             
             <div class="container uk-panel uk-panel-box uk-form" name="AppForm" ng-form>
-                <h4>Add SSL sertificate: </h4>
-                <input type='text' name='name' placeholder="Enter name of certificate" ng-model='crt.name' ng-class="AppForm.name.$invalid ? '' : 'uk-form-success'" required><p></p>
+                <h4>Add SSL sertificate to: </h4>
+                <select ng-model="crt.frontend">
+                    <option value="" disabled selected>Select frontend</option>
+                    <option ng-repeat="ip in ipObjArr">{{ip.frontend}}</option>
+                </select>
+                <p></p>
+                <input type='text' name='name' placeholder="Enter name of certificate" ng-model='crt.name' ng-class="AppForm.name.$invalid ? '' : 'uk-form-success'" required>
+                <p></p>
                 <textarea id='pemTextarea' name='crt' rows="5" cols="54" ng-model='crt.pem' ng-class="AppForm.crt.$invalid ? '' : 'uk-form-success'" placeholder="Place here certificate or paste as file"  required></textarea>
                 <div class="uk-form-file">
                       <button class="uk-button uk-button-mini color">Paste as file</button>
