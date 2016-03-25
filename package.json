@@ -5,6 +5,7 @@
   "devDependencies": {
     "forever-monitor": "^1.7.0",
     "gulp": "^3.9.0",
+    "gulp-install": "^0.6.0",
     "gulp-nodemon": "^2.0.6"
   },
   "dependencies": {
@@ -19,7 +20,7 @@
     "promise": "^7.1.1"
   },
   "scripts": {
-    "start": "forever start --minUptime 1000 --spinSleepTime 1000 index.js",
-    "stop": "forever stop index.js"
+    "start": "forever start --minUptime 1000 --spinSleepTime 1000 app.js",
+    "stop": "forever stop app.js"
   }
 }
