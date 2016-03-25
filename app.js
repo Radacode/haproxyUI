@@ -7,6 +7,12 @@ var bodyParser = require("body-parser");
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
 
+var HOST = process.argv[2] || '127.0.0.1';
+console.log('Will start on host: %s', HOST);
+
+var PORT = process.argv[3] || 3030;
+console.log('Will start on port: %s', PORT);
+
 app.get('/haproxy', function(req, res){
     
     function IPs(filePath){
@@ -215,7 +221,7 @@ app.post('/certificate', function(req, res){
  });
 });
 
-var server = app.listen(8081, function () {
+var server = app.listen(PORT, HOST, function () {
     var host = server.address().address;
     var port = server.address().port;
 
