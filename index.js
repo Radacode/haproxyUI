@@ -130,7 +130,7 @@ app.get('/haproxy', function(req, res){
                http.get(backend, function(res) {
                     resolve(res.statusCode === 200 ? "Available" : "Not available");
             }).on('error', function () {
-                   console.log("Error in request");
+                   console.log(backend + " is not available");
                    resolve("Not available");
                 })
                 .end();

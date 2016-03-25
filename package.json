@@ -5,7 +5,6 @@
   "devDependencies": {
     "forever-monitor": "^1.7.0",
     "gulp": "^3.9.0",
-    "gulp-install": "^0.6.0",
     "gulp-nodemon": "^2.0.6"
   },
   "dependencies": {
@@ -15,7 +14,6 @@
     "express": "^4.13.3",
     "forever": "^0.15.1",
     "fs": "0.0.2",
-    "gulp-install": "^0.6.0",
     "http": "0.0.0",
     "nodemon": "^1.9.1",
     "promise": "^7.1.1"
