@@ -3,6 +3,8 @@ var express = require('express');
 var app = express();
 var http = require('http');
 var bodyParser = require("body-parser");
+var Curl = require( 'node-libcurl' ).Curl;
+var Promise = require('promise');
 
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
@@ -10,7 +12,7 @@ app.use(bodyParser.json());
 var HOST = process.argv[2] || '127.0.0.1';
 console.log('Will start on host: %s', HOST);
 
-var PORT = process.argv[3] || 3030;
+var PORT = process.argv[3] || 8080;
 console.log('Will start on port: %s', PORT);
 
 app.get('/haproxy', function(req, res){
@@ -127,19 +129,30 @@ app.get('/haproxy', function(req, res){
             IPs[i].backend = IPs[i].backend.replace(/^\s*/,'').replace(/\s*$/,'');
             tempBackends[i] = "http://" + IPs[i].backend;
         }
+        
+        
 
-
-        var Promise = require('promise');
+        
 
         function getPromise(backend) {
             return new Promise(function(resolve) {
-               http.get(backend, function(res) {
-                    resolve(res.statusCode === 200 ? "Available" : "Not available");
-            }).on('error', function () {
-                   console.log(backend + " is not available");
-                   resolve("Not available");
-                })
-                .end();
+                
+                var curl = new Curl();
+
+                curl.setOpt( 'URL', backend );
+                curl.setOpt( 'FOLLOWLOCATION', true );
+
+                curl.on( 'end', function( statusCode) {
+                    console.info(backend + ' is available');
+                    resolve("Available");
+                    this.close();
+                });
+                curl.on( 'error', function(){
+                    console.info(backend + ' is not available');
+                    resolve("Not available");
+                    curl.close.bind( curl ) });
+                curl.perform();
+                
          });
         }
 
