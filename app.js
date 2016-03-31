@@ -140,17 +140,21 @@ app.get('/haproxy', function(req, res){
                 var curl = new Curl();
 
                 curl.setOpt( 'URL', backend );
+                curl.setOpt( 'CONNECTTIMEOUT', 5 );
                 curl.setOpt( 'FOLLOWLOCATION', true );
+                curl.setOpt( 'NOBODY', true );
 
                 curl.on( 'end', function( statusCode) {
                     console.info(backend + ' is available');
                     resolve("Available");
                     this.close();
                 });
+                
                 curl.on( 'error', function(){
                     console.info(backend + ' is not available');
                     resolve("Not available");
-                    curl.close.bind( curl ) });
+                    this.close(); });
+                
                 curl.perform();
                 
          });
