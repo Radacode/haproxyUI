@@ -132,39 +132,51 @@ app.get('/haproxy', function(req, res){
             tempBackends[i] = "http://" + IPs[i].backend;
         }
         
+        var tempFrontends = [];
         
-
+        for(var i = 0; i < IPs.length; ++i){
+            IPs[i].frontend = IPs[i].frontend.replace(/^\s*/,'').replace(/\s*$/,'');
+            tempFrontends[i] = "http://" + IPs[i].frontend;
+        }
         
-
-        function getPromise(backend) {
+        var tempIP = [];
+        for(var i = 0; i < IPs.length; ++i){
+            tempIP[i] = tempFrontends[i] + '|' + tempBackends[i];
+           
+        }
+         
+        function getPromise(IP) {
             return new Promise(function(resolve) {
                 
                 var curl = new Curl();
+                
+                var backend = IP.split('|')[1];
+                console.log('Backend ' + backend);
+                var frontend = IP.split('|')[0]
+                console.log('Frontend ' + frontend);
 
                 curl.setOpt( 'URL', backend );
+                //curl.setOpt( 'CURLOPT_HTTPHEADER', ['Host:' + frontend]);
                 curl.setOpt( 'CONNECTTIMEOUT', 5 );
                 curl.setOpt( 'FOLLOWLOCATION', true );
+                curl.setOpt( 'NOBODY', true );
                 
 
-                curl.on( 'end', function(statusCode, body, headers) {
+                curl.on( 'end', function(statusCode) {
                     console.info(backend + ' is available');
                     
-                    curlLog += backend + ' status code ' + statusCode + '\n';
-                    curlLog += backend + ' headers ' + headers + '\n';
-                    curlLog += backend + ' body ' + body + '\n';
-                    
-                    
+                    curlLog += 'Requesting ' + backend + '\n';
+                    curlLog += 'Received status code: ' + statusCode + '\n'; 
+
                     resolve("Available");
                     this.close();
                 });
                 
-                curl.on( 'error', function(statusCode, body, headers){
+                curl.on( 'error', function(statusCode){
                     console.info(backend + ' is not available');
-                    
-                    curlLog += backend + ' status code ' + statusCode + '\n';
-                    curlLog += backend + ' headers ' + headers + '\n';
-                    curlLog += backend + ' body ' + body + '\n';
-              
+                  
+                    curlLog += backend + ' ' + statusCode + '\n';
+                   
                     resolve("Not available");
                     this.close(); 
                 });
@@ -174,7 +186,7 @@ app.get('/haproxy', function(req, res){
          });
         }
 
-        Promise.all(tempBackends . map(getPromise)) .
+        Promise.all(tempIP . map(getPromise)) .
         then(function(stats) {
 
             for(var i = 0; i < stats.length; ++i)
