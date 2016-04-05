@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 var HOST = process.argv[2] || '127.0.0.1';
 console.log('Will start on host: %s', HOST);
 
-var PORT = process.argv[3] || 8080;
+var PORT = process.argv[3] || 8081;
 console.log('Will start on port: %s', PORT);
 
 app.get('/haproxy', function(req, res){
@@ -157,17 +157,18 @@ app.get('/haproxy', function(req, res){
 
                 curl.setOpt( 'VERBOSE', true );
                 curl.setOpt( 'URL', backend );
-                //curl.setOpt( 'CURLOPT_HTTPHEADER', ['Host: ' + frontend]);
+                curl.setOpt( 'HTTPHEADER', ['Host: ' + frontend]);
                 curl.setOpt( 'CONNECTTIMEOUT', 5 );
                 curl.setOpt( 'FOLLOWLOCATION', true );
-                //curl.setOpt( 'NOBODY', true );
+                curl.setOpt( 'NOBODY', true );
                 
 
                 curl.on( 'end', function(statusCode) {
                     console.info(backend + ' is available');
                     
-                    curlLog += 'Requesting ' + backend + '\n';
-                    curlLog += 'Received status code: ' + statusCode + '\n'; 
+                    // curlLog += 'Requesting ' + backend + '\n';
+                    // curlLog += 'Received status code: ' + statusCode + '\n'; 
+                    
 
                     resolve("Available");
                     this.close();
@@ -176,7 +177,8 @@ app.get('/haproxy', function(req, res){
                 curl.on( 'error', function(statusCode){
                     console.info(backend + ' is not available');
                   
-                    curlLog += backend + ' ' + statusCode + '\n';
+                    // curlLog += backend + ' ' + statusCode + '\n';
+                    
                    
                     resolve("Not available");
                     this.close(); 
