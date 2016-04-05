@@ -160,14 +160,14 @@ app.get('/haproxy', function(req, res){
                 curl.setOpt( 'HTTPHEADER', ['Host: ' + frontend]);
                 curl.setOpt( 'CONNECTTIMEOUT', 5 );
                 curl.setOpt( 'FOLLOWLOCATION', true );
-                curl.setOpt( 'NOBODY', true );
+                
                 
 
                 curl.on( 'end', function(statusCode) {
                     console.info(backend + ' is available');
                     
-                    // curlLog += 'Requesting ' + backend + '\n';
-                    // curlLog += 'Received status code: ' + statusCode + '\n'; 
+                    curlLog += 'Requesting ' + backend + '\n';
+                    curlLog += 'Received status code: ' + statusCode + '\n'; 
                     
 
                     resolve("Available");
@@ -177,7 +177,7 @@ app.get('/haproxy', function(req, res){
                 curl.on( 'error', function(statusCode){
                     console.info(backend + ' is not available');
                   
-                    // curlLog += backend + ' ' + statusCode + '\n';
+                    curlLog += backend + ' ' + statusCode + '\n';
                     
                    
                     resolve("Not available");
