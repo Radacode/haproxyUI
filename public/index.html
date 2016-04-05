@@ -1,0 +1,76 @@
+<!DOCTYPE>
+<html ng-app="myApp">
+    <head>
+        <link rel="stylesheet" type="text/css" href="uikit.docs.min.css"/>
+        <link rel="stylesheet" type="text/css" href="mystyle.css"/>
+
+        <script type="text/javascript" src='https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0-rc.0/angular.min.js' defer></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js" defer></script>
+        <script type="text/javascript" src='controllers/controller.js' defer></script>
+                
+        <title>haproxyUI</title>
+    </head>
+    <body>
+    <div class='wrapper'> 
+      <div class="container" ng-controller="AppCtrl" >
+            
+	    <h1 class="center">HAProxy Configuration</h1>
+
+          <div class="container uk-panel uk-panel-box uk-form">
+            <h3 style="color: red">{{errr}}</h3>
+            
+            <table class="table uk-table uk-table-striped uk-table-condensed color">
+                <thead>
+                    <tr >
+                        <th>Frontend</th>
+                        <th>Backend</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="ip in ipObjArr">
+                        <td>{{ip.frontend}}</td>
+                        <td>{{ip.backend}}</td>
+                        <td>{{ip.status}}</td>
+                    </tr>
+                </tbody>
+            </table>
+           
+            
+             <h4>Your haproxy.cfg file:</h4>
+	         <button class="uk-button uk-button-success uk-button-small" type="button" onclick="window.location.href = '/download';">Download</button>
+            
+                <a onclick="$('#text').slideToggle('slow');" href="javascript://">Show/Hide</a>                
+                <div id="text">{{file}}</div>
+        </div>
+            
+            
+        <div class="container uk-panel uk-panel-box uk-form" name="AppForm" ng-form>
+                <h4>Add SSL sertificate to: </h4>
+                <select ng-model="crt.frontend">
+                    <option value="" disabled selected>Select frontend</option>
+                    <option ng-repeat="ip in ipObjArr">{{ip.frontend}}</option>
+                </select>
+                <p></p>
+                <input type='text' name='name' placeholder="Enter name of certificate" ng-model='crt.name' ng-class="AppForm.name.$invalid ? '' : 'uk-form-success'" required>
+                <p></p>
+                <textarea id='pemTextarea' name='crt' rows="5" cols="54" ng-model='crt.pem' ng-class="AppForm.crt.$invalid ? '' : 'uk-form-success'" placeholder="Place here certificate or paste as file"  required></textarea>
+                <div class="uk-form-file">
+                      <button class="uk-button uk-button-mini color">Paste as file</button>
+                      <input type="file" id='pemDownload'>
+                </div>
+                <p></p>
+                <button class="uk-button uk-button-success uk-button-small" ng-click="installCrt()" ng-disabled='AppForm.name.$invalid || AppForm.crt.$invalid'>Install certificate</button>
+            
+                
+        </div>
+        
+        <div class="center">
+            <a onclick="$('#log').slideToggle('slow');" href="javascript://">Show/Hide Log</a>                
+            <div align='left' id="log">{{log}}</div>
+        </div>
+      
+      </div>
+    </div>    
+    </body>
+</html>
