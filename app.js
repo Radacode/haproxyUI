@@ -5,27 +5,31 @@ var http = require('http');
 var bodyParser = require("body-parser");
 var Curl = require( 'node-libcurl' ).Curl;
 var Promise = require('promise');
+var dateFormat = require('dateformat');
+var now = new Date();
 
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
 
-var HOST = process.argv[2] || '127.0.0.1';
-console.log('Will start on host: %s', HOST);
+if (!fs.existsSync(__dirname + '/log')){
+    fs.mkdirSync(__dirname + '/log');
+}
 
-var PORT = process.argv[3] || 8081;
-console.log('Will start on port: %s', PORT);
+var HOST = process.argv[2] || '127.0.0.1';
+console.log(dateFormat(now) + '   ' + 'Will start on host: %s', HOST);
+
+var PORT = process.argv[3] || 8080;
+console.log(dateFormat(now) + '   ' + 'Will start on port: %s', PORT);
 
 app.get('/haproxy', function(req, res){
     
     function IPs(filePath){
         
-        var curlLog = '';
-        
         var regIP = /^(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])(\.(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])){3}\:[0-9]{1,4}\n?$/;
 
         var haproxy_origin = fs.readFileSync(filePath, 'utf8');
         var haproxy_splited_rows = haproxy_origin.split('\n');
-
+        
         //cut and leave only configuration part of haproxy.cfg file
         for(var i = 0; i < haproxy_splited_rows.length; ++i){
             if(haproxy_splited_rows[i] != ''){
@@ -151,9 +155,9 @@ app.get('/haproxy', function(req, res){
                 var curl = new Curl();
                 
                 var backend = IP.split('|')[1];
-                console.log('Backend ' + backend);
+                console.log(dateFormat(now) + '   ' + 'Backend ' + backend);
                 var frontend = IP.split('|')[0];
-                console.log('Frontend ' + frontend);
+                console.log(dateFormat(now) + '   ' + 'Frontend ' + frontend);
 
                 curl.setOpt( 'VERBOSE', true );
                 curl.setOpt( 'URL', backend );
@@ -164,22 +168,15 @@ app.get('/haproxy', function(req, res){
                 
 
                 curl.on( 'end', function(statusCode) {
-                    console.info(backend + ' is available');
+                    console.info(dateFormat(now) + '   ' + backend + ' is available');
                     
-                    curlLog += 'Requesting ' + backend + '\n';
-                    curlLog += 'Received status code: ' + statusCode + '\n'; 
-                    
-
                     resolve("Available");
                     this.close();
                 });
                 
                 curl.on( 'error', function(statusCode){
-                    console.info(backend + ' is not available');
-                  
-                    curlLog += backend + ' ' + statusCode + '\n';
+                    console.info(dateFormat(now) + '   ' + backend + ' is not available');
                     
-                   
                     resolve("Not available");
                     this.close(); 
                 });
@@ -197,15 +194,14 @@ app.get('/haproxy', function(req, res){
                 IPs[i].status = stats[i];
             }
 
-            var data = { IPs : IPs,
-                         log: curlLog};
+            var data = { IPs : IPs};
             res.json(data);
         });
        
        
     }
     try{IPs('/etc/haproxy/haproxy.cfg');}
-    catch(e){ console.log(e); 
+    catch(e){ console.log(dateFormat(now) + '   ' + e); 
     res.end('haproxy.cfg not found');
 }
     
@@ -224,24 +220,51 @@ app.get('/view', function(req, res){
   res.end(file);
 });
 
+app.get('/log', function(req, res){
+    var file = fs.readFileSync(__dirname + '/log/haproxyUI-log.log', 'utf8');
+    res.end('hello from log');
+});
+
 app.post('/certificate', function(req, res){
     
   var haproxy_origin = fs.readFileSync('/etc/haproxy/haproxy.cfg', 'utf8');
+  
   var haproxy_splited_rows = haproxy_origin.split('\n');
+  
+  var pathToStoreCerts = '';
+  var cont = true;
+  
+  for(var i = 0; i < haproxy_splited_rows.length && cont; ++i){
+      
+      var row = haproxy_splited_rows[i].split(' ');     
+      
+      for(var j = 0; j < row.length && cont; ++j){
+          
+          if(row[j].indexOf('crt-base') >= 0){
+              pathToStoreCerts = row[j + 1];
+              cont = false;
+              break;
+          }
+      }
+  }
+  
+  console.log(dateFormat(now) + '   ' + 'Store certificates in ' + pathToStoreCerts);
+  
+  pathToStoreCerts = pathToStoreCerts.replace(/[\n\r]+/g, '');
            
   var certificate = req.body.pem;
   var name = req.body.name;
   var front = req.body.frontend;
-  console.log("Add crt to front:   " + front);
-
-  var path = '/etc/pki/tls/private/' + name + '.pem';
+  console.log(dateFormat(now) + '   ' + "Add crt to front:   " + front);
+  
+  var path = pathToStoreCerts + '/' + name + '.pem';
   var restartCmd = 'service haproxy restart';
   
   var exec = require('child_process').exec;
   
-  for(var i = 0; i<haproxy_splited_rows.length; ++i){
+  for(var i = 0; i < haproxy_splited_rows.length; ++i){
       if (haproxy_splited_rows[i].indexOf('bind') >=0 && haproxy_splited_rows[i].indexOf(front + ':') >=0){
-          haproxy_splited_rows[i] += ' ssl crt /etc/pki/tls/private/' + name +'.pem';
+          haproxy_splited_rows[i] += ' ssl crt ' + path;
       }
   }
   
@@ -249,21 +272,21 @@ app.post('/certificate', function(req, res){
   
   fs.writeFile(path, certificate, function (err) {
             if (err) {
-                return console.log(err);
+                return console.log(dateFormat(now) + '   ' + err);
             }
-            console.log('Certificate wroten in ' + path);
+            console.log(dateFormat(now) + '   ' + 'Certificate wroten in ' + path);
             
                 fs.writeFile('/etc/haproxy/haproxy.cfg', new_haproxy, function (err) {
                 if (err) {
-                    return console.log(err);
+                    return console.log(dateFormat(now) + '   ' + err);
                 }
-                console.log('haproxy.cfg updated');
+                console.log(dateFormat(now) + '   ' + 'haproxy.cfg updated');
             
                     exec(restartCmd, function (error, stdout, stderr) {
                         if (error !== null) {
-                            console.log('exec error: ' + error);
+                            console.log(dateFormat(now) + '   ' + 'exec error: ' + error);
                         }
-                        console.log('Restarting haproxy');
+                        console.log(dateFormat(now) + '   ' + 'Restarting haproxy');
                     });
             });  
  });
@@ -272,6 +295,9 @@ app.post('/certificate', function(req, res){
 var server = app.listen(PORT, HOST, function () {
     var host = server.address().address;
     var port = server.address().port;
+    
+    var writable = fs.createWriteStream(__dirname + '/log/haproxyUI-log.log');
+    process.stdout.write = process.stderr.write = writable.write.bind(writable);
 
-    console.log('haproxyUI listening at http://%s:%s', host, port);
+    console.log(dateFormat(now) + '   ' + 'haproxyUI listening at http://%s:%s', host, port);
 });

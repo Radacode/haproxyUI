@@ -32,27 +32,56 @@ myApp.controller('AppCtrl', ['$scope', '$http', function($scope, $http) {
         
         $scope.crt.pem = document.getElementById("pemTextarea").value;
 
-        $http.post('/certificate', $scope.crt).success(function(response){
-
-           
-     
+        $http.post('/certificate', $scope.crt)
+        .then(function successCallback(response) {
+                console.log('Status code from /certificate ' + response.status);
+                alert('Done');
+                
+        }
+            , function errorCallback(response) {
+                console.log('Status code from /certificate ' + response.status);
+                
         });
         
     };
+    
+    $scope.log = function(){
 
-    $http.get('/haproxy').success(function(response){
-	      
-	if(response == 'haproxy.cfg not found'){$scope.errr = response;}
+        $http.get('/log')
+        .then(function successCallback(response) {
+                console.log('Status code from /log ' + response.status);
+                console.log(response.data);
+        }
+            , function errorCallback(response) {
+                console.log('Status code from /log ' + response.status);
+                console.log(response.data);
+        });
+
+    };
+
+    $http.get('/haproxy')
+    .then(function successCallback(response) {
+                console.log('Status code from /haproxy ' + response.status);
+                if(response == 'haproxy.cfg not found'){$scope.errr = response.data;}
 		
-	else { 
-        $scope.ipObjArr = response.IPs;
-        $scope.log = response.log; 
-    }
-      
-    });
-
-    $http.get('/view').success(function(response){
-      $scope.file = response; 
-    });
-
+                else { 
+                    $scope.ipObjArr = response.data.IPs;
+                    $scope.log = response.data.log; 
+                }
+        }
+         ,function errorCallback(response) {
+                console.log('Status code from /haproxy ' + response.status);
+                console.log(response.data);
+        });
+    
+  
+    $http.get('/view')
+    .then(function successCallback(response) {
+                console.log('Status code from /view ' + response.status);
+                $scope.file = response.data; 
+        }
+            , function errorCallback(response) {
+                console.log('Status code from /view ' + response.status);
+                console.log(response.data);
+        });
 }]);

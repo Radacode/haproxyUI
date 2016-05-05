@@ -32,10 +32,7 @@ textarea {
     -moz-control-character-visibility: visible;
     width: 450px;
 }
-#log{
-    display:none; 
-    white-space: pre-wrap; 
-    word-wrap: break-word; 
-    -moz-control-character-visibility: visible;
-    width: 450px;
+
+.log{
+    text-align: center;
 }

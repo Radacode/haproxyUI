@@ -46,7 +46,7 @@
             
             
         <div class="container uk-panel uk-panel-box uk-form" name="AppForm" ng-form>
-                <h4>Add SSL sertificate to: </h4>
+                <h4>Add SSL certificate to: </h4>
                 <select ng-model="crt.frontend">
                     <option value="" disabled selected>Select frontend</option>
                     <option ng-repeat="ip in ipObjArr">{{ip.frontend}}</option>
@@ -65,9 +65,8 @@
                 
         </div>
         
-        <div class="center">
-            <a onclick="$('#log').slideToggle('slow');" href="javascript://">Show/Hide Log</a>                
-            <div align='left' id="log">{{log}}</div>
+        <div class="log">
+                <button class="uk-button uk-button-mini" ng-click="log()">Show log in console</button>
         </div>
       
       </div>
