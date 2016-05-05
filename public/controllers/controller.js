@@ -66,7 +66,6 @@ myApp.controller('AppCtrl', ['$scope', '$http', function($scope, $http) {
 		
                 else { 
                     $scope.ipObjArr = response.data.IPs;
-                    $scope.log = response.data.log; 
                 }
         }
          ,function errorCallback(response) {

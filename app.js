@@ -202,9 +202,17 @@ app.get('/haproxy', function(req, res){
     }
     try{IPs('/etc/haproxy/haproxy.cfg');}
     catch(e){ console.log(dateFormat(now) + '   ' + e); 
-    res.end('haproxy.cfg not found');
+    res.send('haproxy.cfg not found');
 }
     
+});
+
+app.get('/log', function(req, res){
+    
+    console.log('IN LOG'); 
+    
+    var file = fs.readFileSync(__dirname + '/log/haproxyUI-log.log', 'utf8');
+    res.send(file);
 });
 
 
@@ -217,13 +225,10 @@ app.get('/download', function(req, res){
 
 app.get('/view', function(req, res){
   var file = fs.readFileSync('/etc/haproxy/haproxy.cfg', 'utf8');
-  res.end(file);
+  res.send(file);
 });
 
-app.get('/log', function(req, res){
-    var file = fs.readFileSync(__dirname + '/log/haproxyUI-log.log', 'utf8');
-    res.end('hello from log');
-});
+
 
 app.post('/certificate', function(req, res){
     
@@ -232,20 +237,25 @@ app.post('/certificate', function(req, res){
   var haproxy_splited_rows = haproxy_origin.split('\n');
   
   var pathToStoreCerts = '';
-  var cont = true;
+  var crtBaseSet = false;
   
-  for(var i = 0; i < haproxy_splited_rows.length && cont; ++i){
+  for(var i = 0; i < haproxy_splited_rows.length && !cont; ++i){
       
       var row = haproxy_splited_rows[i].split(' ');     
       
-      for(var j = 0; j < row.length && cont; ++j){
+      for(var j = 0; j < row.length && !cont; ++j){
           
           if(row[j].indexOf('crt-base') >= 0){
               pathToStoreCerts = row[j + 1];
-              cont = false;
+              cont = true;
               break;
           }
       }
+  }
+  
+  
+  if(crtBaseSet){
+      pathToStoreCerts = '/etc/pki/tls/private'
   }
   
   console.log(dateFormat(now) + '   ' + 'Store certificates in ' + pathToStoreCerts);
