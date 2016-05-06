@@ -47,12 +47,10 @@
             
         <div class="container uk-panel uk-panel-box uk-form" name="AppForm" ng-form>
                 <h4>Add SSL certificate to: </h4>
-                <select ng-model="crt.frontend">
+                <select ng-model="crt.frontend" name='select'>
                     <option value="" disabled selected>Select frontend</option>
                     <option ng-repeat="ip in ipObjArr">{{ip.frontend}}</option>
                 </select>
-                <p></p>
-                <input type='text' name='name' placeholder="Enter name of certificate" ng-model='crt.name' ng-class="AppForm.name.$invalid ? '' : 'uk-form-success'" required>
                 <p></p>
                 <textarea id='pemTextarea' name='crt' rows="5" cols="54" ng-model='crt.pem' ng-class="AppForm.crt.$invalid ? '' : 'uk-form-success'" placeholder="Place here certificate or paste as file"  required></textarea>
                 <div class="uk-form-file">
@@ -60,7 +58,10 @@
                       <input type="file" id='pemDownload'>
                 </div>
                 <p></p>
-                <button class="uk-button uk-button-success uk-button-small" ng-click="installCrt()" ng-disabled='AppForm.name.$invalid || AppForm.crt.$invalid'>Install certificate</button>
+                <input id='certName' type='text' name='name' placeholder="Enter name of certificate" ng-model='crt.name' ng-class="AppForm.name.$invalid ? '' : 'uk-form-success'" required>
+                <p></p>
+                
+                <button class="uk-button uk-button-success uk-button-small" ng-click="installCrt()" ng-disabled='AppForm.name.$invalid || AppForm.crt.$invalid || AppForm.select.$untouched'>Install certificate</button>
             
                 
         </div>

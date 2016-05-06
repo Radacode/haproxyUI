@@ -15,6 +15,9 @@ myApp.controller('AppCtrl', ['$scope', '$http', function($scope, $http) {
 		if(textareaName == 'crt') { 
               $scope.$apply(function() {
                   $scope.AppForm.crt.$invalid = false;
+                  document.getElementById("certName").value = control.files[0].name;
+                  $scope.AppForm.name.$invalid = false;
+                  
               });
         }
             };
@@ -31,6 +34,7 @@ myApp.controller('AppCtrl', ['$scope', '$http', function($scope, $http) {
     $scope.installCrt = function(){
         
         $scope.crt.pem = document.getElementById("pemTextarea").value;
+        $scope.crt.name = document.getElementById("certName").value;
 
         $http.post('/certificate', $scope.crt)
         .then(function successCallback(response) {
