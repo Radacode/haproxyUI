@@ -1,6 +1,6 @@
-var myApp = angular.module('myApp', ['angular-loading-bar']);
-myApp.controller('AppCtrl', ['$scope', '$http', function($scope, $http) {
-    console.log("Hello World from controller");
+var myApp = angular.module('myApp', ['cgNotify', 'angular-loading-bar']);
+myApp.controller('AppCtrl', ['$scope', '$http','notify', function($scope, $http, notify) {
+    console.log("controller.js is working");
     
     function copyTo(from, to){
         var control = document.getElementById(from);
@@ -39,11 +39,15 @@ myApp.controller('AppCtrl', ['$scope', '$http', function($scope, $http) {
         $http.post('/certificate', $scope.crt)
         .then(function successCallback(response) {
                 console.log('Status code from /certificate ' + response.status);
-                alert('Done');
+                
+                notify({ message:'Your certificate installed successfully!',
+                         classes:['uk-form-success']} );
                 
         }
             , function errorCallback(response) {
                 console.log('Status code from /certificate ' + response.status);
+                notify({ message: 'Error. Watch log.',
+                         classes:['uk-form-danger']} );
                 
         });
         
@@ -59,6 +63,8 @@ myApp.controller('AppCtrl', ['$scope', '$http', function($scope, $http) {
             , function errorCallback(response) {
                 console.log('Status code from /log ' + response.status);
                 console.log(response.data);
+                notify({ message: 'Error. No log. Look in console.',
+                         classes:['uk-form-danger']} );
         });
 
     };
@@ -75,6 +81,8 @@ myApp.controller('AppCtrl', ['$scope', '$http', function($scope, $http) {
          ,function errorCallback(response) {
                 console.log('Status code from /haproxy ' + response.status);
                 console.log(response.data);
+                notify({ message: 'Error. Watch log.',
+                         classes:['uk-form-danger']} );
         });
     
   
@@ -86,5 +94,7 @@ myApp.controller('AppCtrl', ['$scope', '$http', function($scope, $http) {
             , function errorCallback(response) {
                 console.log('Status code from /view ' + response.status);
                 console.log(response.data);
+                notify({ message: 'Error. Watch log.',
+                         classes:['uk-form-danger']} );
         });
 }]);

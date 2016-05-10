@@ -53,10 +53,9 @@ app.get('/haproxy', function(req, res){
             var temp = haproxy_splited_rows[i].split(' ');
             for(var j = 0; j < temp.length; ++j){
                 if(temp[j] == 'acl'){
-
+                    
                     frontend_names[temp[j+1]] = temp[temp.length - 1];
-
-
+                    
                 }
             }
         }
@@ -208,9 +207,6 @@ app.get('/haproxy', function(req, res){
 });
 
 app.get('/log', function(req, res){
-    
-    console.log('IN LOG'); 
-    
     var file = fs.readFileSync(__dirname + '/log/haproxyUI-log.log', 'utf8');
     res.send(file);
 });
@@ -277,7 +273,7 @@ app.post('/certificate', function(req, res){
   var rebuild = false;
   
   for(var i = 0; i < haproxy_splited_rows.length; ++i){
-      if (haproxy_splited_rows[i].indexOf('bind') >=0 && haproxy_splited_rows[i].indexOf(front + ':') >=0){
+      if (haproxy_splited_rows[i].indexOf('bind') >=0 && haproxy_splited_rows[i].indexOf(front + ':443') >=0){
           
           if(haproxy_splited_rows[i].indexOf('ssl crt') >= 0){
               console.log(dateFormat(now) + '   ' + 'in ' + front + ' path to certs selected');
@@ -316,6 +312,7 @@ app.post('/certificate', function(req, res){
                             console.log(dateFormat(now) + '   ' + 'exec error: ' + error);
                         }
                         console.log(dateFormat(now) + '   ' + 'Restarting haproxy');
+                        res.send('Certificate installed!')
                     });
             });  
  });
