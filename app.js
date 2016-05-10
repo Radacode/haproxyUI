@@ -26,7 +26,10 @@ app.get('/haproxy', function(req, res){
     function IPs(filePath){
         
         var regIP = /^(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])(\.(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])){3}\:[0-9]{1,4}\n?$/;
-
+        var regIPwithoutPort = /^(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])(\.(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])){3}?$/;
+        var regDomain = /^(?!:\/\/)([a-zA-Z0-9]+\.)?[a-zA-Z0-9][a-zA-Z0-9-]+\.[a-zA-Z]{2,6}?$/i;
+        
+      
         var haproxy_origin = fs.readFileSync(filePath, 'utf8');
         var haproxy_splited_rows = haproxy_origin.split('\n');
         
@@ -54,12 +57,23 @@ app.get('/haproxy', function(req, res){
             for(var j = 0; j < temp.length; ++j){
                 if(temp[j] == 'acl'){
                     
-                    frontend_names[temp[j+1]] = temp[temp.length - 1];
+                    var domains = '';
                     
+                    for(var k = j; k < temp.length; ++k){
+                        
+                        if(regDomain.test(temp[k]) || regIP.test(temp[k]) || regIPwithoutPort.test(temp[k])){
+                               if(k == temp.length - 1) { domains += temp[k]; }
+                               else{
+                                   domains += temp[k] + ', ';
+                               }
+                        }
+                    }
+                    
+                    frontend_names[temp[j+1]] = domains;
                 }
             }
         }
-
+        
         //search for {backend name : backend address}
         var backend_part_rows = [];
         for(var i = 0; i < haproxy_splited_rows.length; ++i){
@@ -104,7 +118,9 @@ app.get('/haproxy', function(req, res){
         // define pairs front-backend
         var pairs = [];
         for(var i = 0; i < haproxy_splited_rows.length; ++i){
+            
             var temp = haproxy_splited_rows[i].split(' ');
+            
             for(var j = 0; j < temp.length; ++j) {
                 if (temp[j] == 'use_backend'){
                     var obj = {};
@@ -120,12 +136,39 @@ app.get('/haproxy', function(req, res){
         var IPs = [];
 
         for(var i = 0; i < pairs.length; ++i){
-            var obj = {};
-            obj.frontend = frontend_names[pairs[i].frontend];
-            obj.backend = backend_names[pairs[i].backend];
-            obj.status = "Not available";
-            IPs.push(obj);
+            
+            var temp_fronts = frontend_names[pairs[i].frontend].split(',');
+            console.log(temp_fronts.length);
+            
+            if(temp_fronts.length > 1){
+                
+                for(var j = 0; j < temp_fronts.length; ++j){
+                    
+                    var obj = {};
+                    
+                    obj.frontend = temp_fronts[j];
+                    obj.backend = backend_names[pairs[i].backend];
+                    obj.status = "Not available";
+                    
+                    IPs.push(obj);
+                     
+                }
+            }
+            
+            else{
+                
+                var obj = {};
+            
+                    obj.frontend = frontend_names[pairs[i].frontend];
+                    obj.backend = backend_names[pairs[i].backend];
+                    obj.status = "Not available";
+                    
+                    IPs.push(obj);
+            }
         }
+
+
+       console.log(IPs);
 
         // preparing for status check
         var tempBackends = [];
@@ -158,7 +201,7 @@ app.get('/haproxy', function(req, res){
                 var frontend = IP.split('|')[0];
                 console.log(dateFormat(now) + '   ' + 'Frontend ' + frontend);
 
-                curl.setOpt( 'VERBOSE', true );
+                //curl.setOpt( 'VERBOSE', true );
                 curl.setOpt( 'URL', backend );
                 curl.setOpt( 'HTTPHEADER', ['Host: ' + frontend]);
                 curl.setOpt( 'CONNECTTIMEOUT', 5 );
@@ -322,8 +365,8 @@ var server = app.listen(PORT, HOST, function () {
     var host = server.address().address;
     var port = server.address().port;
     
-    var writable = fs.createWriteStream(__dirname + '/log/haproxyUI-log.log');
-    process.stdout.write = process.stderr.write = writable.write.bind(writable);
+    // var writable = fs.createWriteStream(__dirname + '/log/haproxyUI-log.log');
+    // process.stdout.write = process.stderr.write = writable.write.bind(writable);
 
     console.log(dateFormat(now) + '   ' + 'haproxyUI listening at http://%s:%s', host, port);
 });
