@@ -21,15 +21,14 @@ console.log(dateFormat(now) + '   ' + 'Will start on host: %s', HOST);
 var PORT = process.argv[3] || 8080;
 console.log(dateFormat(now) + '   ' + 'Will start on port: %s', PORT);
 
-app.get('/haproxy', function(req, res){
-    
-    function IPs(filePath){
-        
         var regIP = /^(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])(\.(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])){3}\:[0-9]{1,4}\n?$/;
         var regIPwithoutPort = /^(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])(\.(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])){3}?$/;
         var regDomain = /^(?!:\/\/)([a-zA-Z0-9]+\.)?[a-zA-Z0-9][a-zA-Z0-9-]+\.[a-zA-Z]{2,6}?$/i;
-        
-      
+
+app.get('/haproxy', function(req, res){
+    
+    function IPs(filePath){
+
         var haproxy_origin = fs.readFileSync(filePath, 'utf8');
         var haproxy_splited_rows = haproxy_origin.split('\n');
         
@@ -138,7 +137,6 @@ app.get('/haproxy', function(req, res){
         for(var i = 0; i < pairs.length; ++i){
             
             var temp_fronts = frontend_names[pairs[i].frontend].split(',');
-            console.log(temp_fronts.length);
             
             if(temp_fronts.length > 1){
                 
@@ -166,9 +164,6 @@ app.get('/haproxy', function(req, res){
                     IPs.push(obj);
             }
         }
-
-
-       console.log(IPs);
 
         // preparing for status check
         var tempBackends = [];
@@ -271,67 +266,103 @@ app.get('/view', function(req, res){
 
 app.post('/certificate', function(req, res){
     
-  var haproxy_origin = fs.readFileSync('/etc/haproxy/haproxy.cfg', 'utf8');
-  
-  var haproxy_splited_rows = haproxy_origin.split('\n');
-  
-//   var pathToStoreCerts = '';
-//   var crtBaseSet = false;
-  
-//   for(var i = 0; i < haproxy_splited_rows.length && !cont; ++i){
-      
-//       var row = haproxy_splited_rows[i].split(' ');     
-      
-//       for(var j = 0; j < row.length && !cont; ++j){
-          
-//           if(row[j].indexOf('crt-base') >= 0){
-//               pathToStoreCerts = row[j + 1];
-//               cont = true;
-//               break;
-//           }
-//       }
-//   }
-  
-  
-//   if(crtBaseSet){
-//       pathToStoreCerts = '/etc/pki/tls/private'
-//   }
+        var haproxy_origin = fs.readFileSync('/etc/haproxy/haproxy.cfg', 'utf8');
+        var haproxy_splited_rows = haproxy_origin.split('\n');
+        var haproxy_splited_rows_copy_to_adding_path = haproxy_origin.split('\n');
+        
+        //cut and leave only configuration part of haproxy.cfg file
+        for(var i = 0; i < haproxy_splited_rows.length; ++i){
+            if(haproxy_splited_rows[i] != ''){
+                 var temp = haproxy_splited_rows[i].split(' ');
+                 if(temp[0] == 'frontend'){
+                     haproxy_splited_rows = haproxy_splited_rows.slice(i);
+                     break;
+                 }
+            }
+        }
 
-  var pathToStoreCerts = '/etc/pki/tls/private';
+        //delete odd spaces
+        for(var i = 0; i < haproxy_splited_rows.length; ++i){
+            haproxy_splited_rows[i] = haproxy_splited_rows[i].replace(/^\s*/,'').replace(/\s*$/,'');
+        }
+
+        var pathToStoreCerts = '/etc/pki/tls/private';
+        
+        console.log(dateFormat(now) + '   ' + 'Store certificates in ' + pathToStoreCerts);
+        
+        pathToStoreCerts = pathToStoreCerts.replace(/[\n\r]+/g, '');
+                
+        var certificate = req.body.pem;
+        var name = req.body.name;
+        var domainToInstallCert = req.body.frontend;
+        console.log(dateFormat(now) + '   ' + "Add crt to front:   " + domainToInstallCert);
+        
+        var path = pathToStoreCerts;
+        var restartCmd = 'service haproxy restart';
   
-  console.log(dateFormat(now) + '   ' + 'Store certificates in ' + pathToStoreCerts);
   
-  pathToStoreCerts = pathToStoreCerts.replace(/[\n\r]+/g, '');
-           
-  var certificate = req.body.pem;
-  var name = req.body.name;
-  var front = req.body.frontend;
-  console.log(dateFormat(now) + '   ' + "Add crt to front:   " + front);
+        var ipToInstallCert = '';
+        var ipFounded = false;
+        
+        for(var i = haproxy_splited_rows.length - 1; i >= 0 ; --i){
+            
+            var temp = haproxy_splited_rows[i].split(' ');
+            
+            for(var j = 0; j < temp.length; ++j){
+                
+                if(temp[j] == 'acl'){
+                    
+                    for(var k = j; k < temp.length; ++k){
+                        
+                        if(temp[k] == domainToInstallCert){
+                            
+                            for(var m = i + 1; m >= 0; --m){
+                                
+                                var temp = haproxy_splited_rows[m].split(' ');
+                                
+                                for(var n = 0; n < temp.length; ++n){
+                                    
+                                    if(temp[j] == 'bind'){
+                                        
+                                        for(var l = n; l < temp.length; ++l){
+                                            
+                                            if(regIP.test(temp[l]) && !ipFounded){
+                                                ipToInstallCert = temp[l];
+                                                ipFounded = true;
+                                            }
+                                        }
+                                    } 
+                                } 
+                            }  
+                        }
+                    }
+                }
+            }
+        }
   
-  var path = pathToStoreCerts;
-  var restartCmd = 'service haproxy restart';
+  
   
   var exec = require('child_process').exec;
   
   var rebuild = false;
   
-  for(var i = 0; i < haproxy_splited_rows.length; ++i){
-      if (haproxy_splited_rows[i].indexOf('bind') >=0 && haproxy_splited_rows[i].indexOf(front + ':443') >=0){
+  for(var i = 0; i < haproxy_splited_rows_copy_to_adding_path.length; ++i){
+      if (haproxy_splited_rows_copy_to_adding_path[i].indexOf('bind') >=0 && haproxy_splited_rows_copy_to_adding_path[i].indexOf(ipToInstallCert) >=0){
           
-          if(haproxy_splited_rows[i].indexOf('ssl crt') >= 0){
-              console.log(dateFormat(now) + '   ' + 'in ' + front + ' path to certs selected');
+          if(haproxy_splited_rows_copy_to_adding_path[i].indexOf('ssl crt') >= 0){
+              console.log(dateFormat(now) + '   ' + 'in ' + ipToInstallCert + ' path to certs selected');
               break;
           }
           else{
-              haproxy_splited_rows[i] += ' ssl crt ' + path;
-              console.log(dateFormat(now) + '   ' + 'in ' + front + ' path to certs created');
+              haproxy_splited_rows_copy_to_adding_path[i] += ' ssl crt ' + path;
+              console.log(dateFormat(now) + '   ' + 'in ' + ipToInstallCert + ' path to certs created');
               rebuild = true;
               break;
           }
       }
   }
   if(rebuild){
-      var new_haproxy = haproxy_splited_rows.join('\n');
+      var new_haproxy = haproxy_splited_rows_copy_to_adding_path.join('\n');
   }
   else{
       var new_haproxy = haproxy_origin;
@@ -365,8 +396,8 @@ var server = app.listen(PORT, HOST, function () {
     var host = server.address().address;
     var port = server.address().port;
     
-    // var writable = fs.createWriteStream(__dirname + '/log/haproxyUI-log.log');
-    // process.stdout.write = process.stderr.write = writable.write.bind(writable);
+    var writable = fs.createWriteStream(__dirname + '/log/haproxyUI-log.log');
+    process.stdout.write = process.stderr.write = writable.write.bind(writable);
 
     console.log(dateFormat(now) + '   ' + 'haproxyUI listening at http://%s:%s', host, port);
 });
