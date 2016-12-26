@@ -1,6 +1,6 @@
-var myApp = angular.module('myApp', ['cgNotify', 'angular-loading-bar']);
-myApp.controller('AppCtrl', ['$scope', '$http','notify', function($scope, $http, notify) {
-    console.log("controller.js is working");
+var myApp = angular.module('haproxyUI', ['cgNotify', 'angular-loading-bar']);
+myApp.controller('MainCtrl', ['$scope', '$http','notify', function($scope, $http, notify) {
+    console.log("home controller is working");
     
     function copyTo(from, to){
         var control = document.getElementById(from);
@@ -84,8 +84,7 @@ myApp.controller('AppCtrl', ['$scope', '$http','notify', function($scope, $http,
                 notify({ message: 'Error. Watch log.',
                          classes:['uk-form-danger']} );
         });
-    
-  
+
     $http.get('/view')
     .then(function successCallback(response) {
                 console.log('Status code from /view ' + response.status);

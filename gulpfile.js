@@ -4,7 +4,7 @@ var install = require("gulp-install");
 
 gulp.task('serve', ['build'], function () {
   nodemon({
-    script: 'index.js'
+    script: 'app.js'
   , ext: 'js html'
   , env: { 'NODE_ENV': 'development' }
   })
