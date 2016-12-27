@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "async": "^2.1.4",
+    "bearer": "0.0.20",
     "body-parser": "^1.15.0",
     "dateformat": "^2.0.0",
     "deferred": "^0.7.4",
@@ -25,5 +26,10 @@
   "scripts": {
     "start": "forever start --minUptime 1000 --spinSleepTime 1000 app.js",
     "stop": "forever stop app.js"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Radacode/haproxyUI.git"
+  },
+  "license": "MIT"
 }

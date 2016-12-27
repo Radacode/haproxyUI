@@ -5,10 +5,64 @@ var fs = require('fs'),
     http = require('http'),
     bodyParser = require("body-parser"),
     dateFormat = require('dateformat'),
+    path = require('path'),
     now = new Date();
 
-app.use(express.static(__dirname + '/public'));
+var bearer = require('./middlewares/bearer-auth');
+
+bearer({
+    //Make sure to pass in the app (express) object so we can set routes
+    app:app,
+    //Please change server key for your own safety!
+    serverKey:"C3E21A22746633E7F9A92261A3001036EB98E83513C7D1351532943549C6E2FE",
+    loginUlr:'/login',
+    validateToken:function(req, token){
+        //you could also check if request came from same IP using req.ip==token.ip for example
+        if (token){
+            return moment(token.expire)>moment(new Date());
+        }
+        return false;
+    },
+    onTokenValid:function(token, next, cancel){
+        //This is in case you would like to check user account status in DB each time he attempts to do something.
+        //Doing this will affect your performance but its your choice if you really need it
+        //Returning false from this method will reject user even if his token is OK
+        var username=token.username;
+        if (true){
+            next()
+        }else{
+            cancel();
+        }
+    },
+    userInRole:function(token, roles, next, cancel){
+        //Provide role level access restrictions on url
+        //You can use onTokenValid for this also, but I find this easier to read later
+        //If you specified "roles" property for any secureRoute below, you must implement this method
+        var username=token.username;
+
+        if (true){
+            next();
+        }else
+        {
+            cancel();
+        }
+    },
+    onAuthorized: function(req, token){
+        //console.log("this will be executed if request is OK");
+    },
+    onUnauthorized: function(req, token){
+        //console.log(req.path, "this will be executed if request fails authentication");
+    },
+    secureRoutes:[
+        {url:'/haproxy/status', method:'get'}
+    ]
+});
+
+app.use(express.static(path.join(__dirname + '/public')));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}))
+
+app.use(require('./controllers'));
 
 if (!fs.existsSync(__dirname + '/log')){
     fs.mkdirSync(__dirname + '/log');
@@ -20,9 +74,13 @@ console.log(dateFormat(now) + '   ' + 'Will start on host: %s', HOST);
 var PORT = process.argv[3] || 8080;
 console.log(dateFormat(now) + '   ' + 'Will start on port: %s', PORT);
 
-app.use(require('./controllers'))
+app.get('/', function(req, res) {
+    res.sendFile(path.join(__dirname + '/views/index.html'));
+});
 
-app.listen(PORT, HOST, function () {
+
+
+var server = app.listen(PORT, HOST, function () {
     var host = server.address().address;
     var port = server.address().port;
     

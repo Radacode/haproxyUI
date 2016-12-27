@@ -1,0 +1,20 @@
+<div class="login-box" id="login-box">
+    <div class="login-form">
+        <div id="radacode-logo"></div>
+        <div id="radacode"></div>
+        <div id="login-data">
+            <div id="login">
+                <span class="login-span" >Username:</span>
+                <input type="text" ng-model="loginModel.username"  />
+                <hr />
+            </div>
+            <div id="password">
+                <span class="passw-span">Password:</span>
+                <input type="password"  class="passw" ng-model="loginModel.password"/>
+                <hr/>
+                <button class="login-button" ng-class="{'flipping': isFlipping == true}" ng-click="login()"> </button>
+                <br>
+            </div>
+        </div>
+    </div>
+</div>

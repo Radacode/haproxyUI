@@ -3,15 +3,19 @@
  */
 
 var express = require('express'),
-
+    router = express.Router()
     curl = require( 'node-libcurl' ).Curl,
-    promise = require('promise');
+    promise = require('promise'),
+    dateFormat = require('dateformat'),
+    now = new Date();
+
+console.log(dateFormat(now) + '   ' + 'Index.js backend controller initializing...');
 
 var regIP = /^(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])(\.(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])){3}\:[0-9]{1,4}\n?$/;
 var regIPwithoutPort = /^(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])(\.(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])){3}?$/;
 var regDomain = /^(?!:\/\/)([a-zA-Z0-9]+\.)?[a-zA-Z0-9][a-zA-Z0-9-]+\.[a-zA-Z]{2,6}?$/i;
 
-app.get('/haproxy', function(req, res){
+router.get('/haproxy/status', function(req, res){
 
     function IPs(filePath){
 
@@ -230,24 +234,24 @@ app.get('/haproxy', function(req, res){
 
 });
 
-app.get('/log', function(req, res){
+router.get('/log', function(req, res){
     var file = fs.readFileSync(__dirname + '/log/haproxyUI-log.log', 'utf8');
     res.send(file);
 });
 
-app.get('/download', function(req, res){
+router.get('/download', function(req, res){
 
     var file = '/etc/haproxy/haproxy.cfg';
     res.download(file);
 
 });
 
-app.get('/view', function(req, res){
+router.get('/haproxy.cfg/view', function(req, res){
     var file = fs.readFileSync('/etc/haproxy/haproxy.cfg', 'utf8');
     res.send(file);
 });
 
-app.post('/certificate', function(req, res){
+router.post('/certificate', function(req, res){
 
     var haproxy_origin = fs.readFileSync('/etc/haproxy/haproxy.cfg', 'utf8');
     var haproxy_splited_rows = haproxy_origin.split('\n');
@@ -374,3 +378,5 @@ app.post('/certificate', function(req, res){
         });
     });
 });
+
+module.exports = router;
