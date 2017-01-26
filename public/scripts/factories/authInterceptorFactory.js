@@ -1,5 +1,5 @@
 'use strict';
-haproxyApp.factory('authInterceptorFactory', ['$q', '$injector', '$location', 'localStorageService', function ($q, $injector, $location,localStorageService) {
+haproxyApp.factory('authInterceptorFactory', ['$q', '$injector', '$location', 'localStorageService', function ($q, $injector, $location, localStorageService) {
 
     var authInterceptorServiceFactory = {};
 

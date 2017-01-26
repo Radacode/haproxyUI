@@ -1,4 +1,4 @@
-haproxyApp.controller('LoginController', ['$scope',"$http",'$location','$window','$log','loginFactory','checkFactory', function ($scope,$http,$location,$window,$log,loginFactory,checkFactory) {
+haproxyApp.controller('LoginController', ['$scope',"$http",'$location','$window','$log','loginFactory','$state', function ($scope,$http,$location,$window,$log,loginFactory, $state) {
 
     $scope.loginModel = {
         username: "",
@@ -19,16 +19,9 @@ haproxyApp.controller('LoginController', ['$scope',"$http",'$location','$window'
 
             loginFactory.login($scope.loginModel)
                 .then(function (res) {
-
-                        checkFactory.get()
-                            .then(function () {
-                                    $window.location = appConfig.baseUrl + 'control';
-                                },
-                                function (errorPayLoad) {
-                                    $scope.isFlipping = false;
-                                    $scope.isLoggingIn = false;
-                                    $log.error(errorPayLoad);
-                                });
+                        $scope.isLoggingIn = false;
+                        $scope.isFlipping = false;
+                        $state.go('app.home');
                     },
                     function (errorPayLoad) {
                         $scope.isLoggingIn = false;

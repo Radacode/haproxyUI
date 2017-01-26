@@ -103,8 +103,7 @@ function bearerJS(settings) {
                 }
             }else
             {
-                res.redirect(settings.tokenUrl);
-                //cancel(401,"Invalid token");
+                cancel(401,"Invalid token");
             }
         }else
         {

@@ -8,7 +8,7 @@ haproxyApp.factory('loginFactory', ['$http', '$q', 'localStorageService', '$loca
         var deferred = $q.defer();
 
         $http.post(
-            appConfig.baseUrl + appConfig.auth.token,
+            appConfig.loginBase + appConfig.auth.token,
             data,
             { headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' } }
         )

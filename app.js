@@ -14,8 +14,9 @@ bearer({
     //Make sure to pass in the app (express) object so we can set routes
     app:app,
     //Please change server key for your own safety!
-    serverKey:"C3E21A22746633E7F9A92261A3001036EB98E83513C7D1351532943549C6E2FE",
-    loginUlr:'/login',
+    decryptionKey:"C3E21A22746633E7F9A92261A3001036EB98E83513C7D1351532943549C6E2FE",
+    validationKey: "3FBA318F3B5B6F3149A726B9813B805CAB00284F",
+    loginUrl:'/login',
     validateToken:function(req, token){
         //you could also check if request came from same IP using req.ip==token.ip for example
         if (token){
@@ -47,14 +48,8 @@ bearer({
             cancel();
         }
     },
-    onAuthorized: function(req, token){
-        //console.log("this will be executed if request is OK");
-    },
-    onUnauthorized: function(req, token){
-        //console.log(req.path, "this will be executed if request fails authentication");
-    },
     secureRoutes:[
-        {url:'/haproxy/status', method:'get'}
+        {url:'/haproxy/status/', method:'get'}
     ]
 });
 
@@ -74,11 +69,9 @@ console.log(dateFormat(now) + '   ' + 'Will start on host: %s', HOST);
 var PORT = process.argv[3] || 8080;
 console.log(dateFormat(now) + '   ' + 'Will start on port: %s', PORT);
 
-app.get('/', function(req, res) {
+app.get('*', function(req, res) {
     res.sendFile(path.join(__dirname + '/views/index.html'));
 });
-
-
 
 var server = app.listen(PORT, HOST, function () {
     var host = server.address().address;

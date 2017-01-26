@@ -1,7 +1,7 @@
-var haproxyApp = angular.module('haproxyUI', ['ui.router', 'LocalStorageModule']).config(function ($stateProvider, $locationProvider, $urlRouterProvider) {
+var haproxyApp = angular.module('haproxyUI', ['ui.router', 'LocalStorageModule', 'cgNotify']).config(function ($stateProvider, $locationProvider, $urlRouterProvider) {
     $stateProvider
         .state('app', {
-            url: '',
+            url: '/',
             views: {
                 '': {
                     templateUrl: "/scripts/views/app.html",
@@ -10,17 +10,16 @@ var haproxyApp = angular.module('haproxyUI', ['ui.router', 'LocalStorageModule']
             }
         })
         .state('app.home', {
-            url: "/",
+            url: "dashboard",
             views: {
                 'content': {
                     templateUrl: "/scripts/views/dashboard.html",
                     controller: "DashboardController"
                 }
             }
-
         })
         .state('app.login', {
-            url: "/login",
+            url: "login",
             views: {
                 'content': {
                     templateUrl: "/scripts/views/login.html",

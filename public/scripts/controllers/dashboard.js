@@ -70,9 +70,9 @@ haproxyApp.controller('DashboardController', ['$scope', '$http','notify', functi
 
     };
 
-    $http.get('/haproxy/status')
+    $http.get('/haproxy/status/')
         .then(function successCallback(response) {
-                console.log('Status code from /haproxy ' + response.status);
+                console.log('Status code from /haproxy/status/ ' + response.status);
                 if(response.data == 'haproxy.cfg not found'){$scope.errr = response.data;}
 
                 else {
@@ -92,9 +92,13 @@ haproxyApp.controller('DashboardController', ['$scope', '$http','notify', functi
                 }
             }
             ,function errorCallback(response) {
-                console.log('Status code from /haproxy ' + response.status);
-                console.log(response.data);
-                notify({ message: 'Error. Watch log.',
-                    classes:['uk-form-danger']} );
+                if(response.status != 401) {
+                    console.log('Status code from /haproxy ' + response.status);
+                    console.log(response.data);
+                    notify({
+                        message: 'Error. Watch log.',
+                        classes: ['uk-form-danger']
+                    });
+                }
             });
 }]);
