@@ -4,6 +4,8 @@
 
 //Authentication setup
 var CryptoJS = require('node-cryptojs-aes').CryptoJS;
+var base64url = require('base64url');
+var nodeCrypto = require('crypto');
 
 function matchPath(mask, path){
     mask=mask.toLowerCase();
@@ -29,8 +31,23 @@ function checkUrl(url, method, routes){
     return false;
 }
 
-function decryptToken(settings){
-    var decrypted = CryptoJS.AES.decrypt(settings.bearer, settings.serverKey);
+function decryptToken(params){
+    var key = Buffer.from(params.serverKey, 'hex');
+    var keyWords = CryptoJS.lib.WordArray.create(key);
+    var base64 = base64url.toBase64(params.bearer);
+    var decoded = CryptoJS.enc.Base64.parse(base64);
+    var iv = Buffer.alloc(16);
+
+    for (var i = 0 ; i < 4 ; i++) {
+        var currentBuffer = Buffer.from(decoded.words[i].toString(16).match(/../g).map(s=>parseInt(s, 16)));
+        for (var x = 0 ; x < 4 ; x ++) {
+            iv[i*4 + x] = currentBuffer[x];
+        }
+    }
+
+    var ivWords = CryptoJS.lib.WordArray.create(iv);
+
+    var decrypted = CryptoJS.AES.decrypt(decoded, keyWords, {iv: ivWords});
     var token;
     try{
         token=JSON.parse(CryptoJS.enc.Utf8.stringify(decrypted));
@@ -50,7 +67,7 @@ function bearerJS(settings) {
             bearer=bearer.replace('Bearer ','');
             token=decryptToken({
                 bearer:bearer,
-                serverKey:settings.serverKey
+                serverKey:settings.decryptionKey
             });
         }
 

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "async": "^2.1.4",
+    "base64url": "^2.0.0",
     "bearer": "0.0.20",
     "body-parser": "^1.15.0",
     "dateformat": "^2.0.0",
