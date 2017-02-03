@@ -44,31 +44,27 @@ function decryptToken(params){
         for (var x = 0 ; x < 4 ; x ++) {
             iv[i*4 + x] = currentBuffer[x];
         }*/
-
+    var token = params.bearer;
     var base64Secret = base64url.toBase64(params.serverKey);
-    var audience = '099153c2625149bc8ecb3e85e03f0022';
-    var issuer = 'http://jwtauthzsrv.azurewebsites.net';
+    var secret = new Buffer(base64Secret, "base64");
     try {
         var decoded = jwt.verify(
-            params.bearer,
-            base64Secret);
+            token,
+            secret);
     } catch(err) {
-
+        console.log(err);
     }
 
-        function(err, decoded) {
+    if(!decoded) {
+        decoded = jwt.decode(token);
+    }
+    var token;
+    try{
+        token=JSON.parse(CryptoJS.enc.Utf8.stringify(decoded));
+    }catch(e){
+    }
 
-            if(!decoded) {
-                decoded = jwt.decode(token);
-            }
-            var token;
-            try{
-                token=JSON.parse(CryptoJS.enc.Utf8.stringify(decoded));
-            }catch(e){
-            }
-
-            return token;
-    });
+    return token;
 }
 
 function bearerJS(settings) {
