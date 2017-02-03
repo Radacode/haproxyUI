@@ -5,7 +5,7 @@
 //Authentication setup
 var CryptoJS = require('node-cryptojs-aes').CryptoJS;
 var base64url = require('base64url');
-var nodeCrypto = require('crypto');
+var jwt = require('jsonwebtoken');
 
 function matchPath(mask, path){
     mask=mask.toLowerCase();
@@ -32,7 +32,8 @@ function checkUrl(url, method, routes){
 }
 
 function decryptToken(params){
-    var key = Buffer.from(params.serverKey, 'hex');
+
+/*    var key = Buffer.from(params.serverKey, 'hex');
     var keyWords = CryptoJS.lib.WordArray.create(key);
     var base64 = base64url.toBase64(params.bearer);
     var decoded = CryptoJS.enc.Base64.parse(base64);
@@ -42,18 +43,32 @@ function decryptToken(params){
         var currentBuffer = Buffer.from(decoded.words[i].toString(16).match(/../g).map(s=>parseInt(s, 16)));
         for (var x = 0 ; x < 4 ; x ++) {
             iv[i*4 + x] = currentBuffer[x];
-        }
+        }*/
+
+    var base64Secret = base64url.toBase64(params.serverKey);
+    var audience = '099153c2625149bc8ecb3e85e03f0022';
+    var issuer = 'http://jwtauthzsrv.azurewebsites.net';
+    try {
+        var decoded = jwt.verify(
+            params.bearer,
+            base64Secret);
+    } catch(err) {
+
     }
 
-    var ivWords = CryptoJS.lib.WordArray.create(iv);
+        function(err, decoded) {
 
-    var decrypted = CryptoJS.AES.decrypt(decoded, keyWords, {iv: ivWords});
-    var token;
-    try{
-        token=JSON.parse(CryptoJS.enc.Utf8.stringify(decrypted));
-    }catch(e){
-    }
-    return token;
+            if(!decoded) {
+                decoded = jwt.decode(token);
+            }
+            var token;
+            try{
+                token=JSON.parse(CryptoJS.enc.Utf8.stringify(decoded));
+            }catch(e){
+            }
+
+            return token;
+    });
 }
 
 function bearerJS(settings) {
