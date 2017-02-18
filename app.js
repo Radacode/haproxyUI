@@ -14,7 +14,7 @@ bearer({
     //Make sure to pass in the app (express) object so we can set routes
     app:app,
     //Please change server key for your own safety!
-    decryptionKey:"IxrAjDoa2FqElO7IhrSrUJELhUckePEPVpaePlS_Xaw",
+    decryptionKey:"By5oHFsZ5fDAw/7Sxh8yeUzIDvf0+oK+l+l+whCTyyx",
     loginUrl:'/login',
     validateToken:function(req, token){
         //you could also check if request came from same IP using req.ip==token.ip for example
